@@ -3,7 +3,26 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use((req, res, next) => {
+    req.body = req.body || {};
+    next();
+})
 
+app.use('/api/auth', require('./routes/auth'));
+
+app.use((req, res) => {
+    res.status(404).json({ status: 'error', message: 'ไม่พบ API นี้', data: null });
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.message);
+    let code = 500;
+    let message = 'ระบบขัดข้อง:' + err;
+    if (err.code === 'ER_DUP_ENTRY') { code = 400; message = 'ข้อมูลซ้ำกับที่มีอยู่แล้ว'; }
+    if (err.code === 'LIMIT_FILE_SIZE') { code = 400; message = err.message; }
+    res.status(code).json({ status: 'error', message, data: null });
+});
 /*app.get('/api/user', (req, res) => {
     let user = {
         fristname: 'test',

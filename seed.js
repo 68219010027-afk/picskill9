@@ -11,16 +11,16 @@ async function seed() {
 
     const users = [
         ['admin','admin1234', 'ฝ่ายบุคลากร', 'admin', 0],
-        ['emp1', 'ema12345', 'สมชาย ใจดี', 'evaluatee', 1],
-        ['emp2', 'ema12345', 'สมหญิ่ง ตั้งใจ', 'evaluatee', 1],
+        ['emp1', 'emp12345', 'สมชาย ใจดี', 'evaluatee', 1],
+        ['emp2', 'emp12345', 'สมหญิ่ง ตั้งใจ', 'evaluatee', 1],
         ['eva1', 'eva12345', 'ประธาน กรรมการ', 'evaluator',1],
         ['eva2', 'eva12345', 'กรรมการ ร่วม', 'evaluator', 1],
     ];
     for (const [username, password, name, role, mustChange] of users) {
         const hash = await bcrypt.hash(password, 10);
         await query(
-            'INSERT IGNORE INTO users (username, password, full_name, role, must_change_password) VALUES(?, ?, ?, ?, ?)',
-            [username, hash, name, role, mustChange],
+            'INSERT INTO users (username, password, full_name, role, must_change_password) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE password = VALUES(password)',
+            [username, hash, name, role, mustChange]
         );
     }
 
